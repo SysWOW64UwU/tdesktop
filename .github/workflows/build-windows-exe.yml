@@ -92,11 +92,8 @@ jobs:
           restore-keys: ${{ runner.OS }}-x64-qt-
 
       - name: Libraries
-        shell: cmd
         run: |
-          set "PATH=%PATH%;C:\msys64\mingw64\bin"
-          cd /d %TBUILD%\%REPO_NAME%\Telegram\build
-          call prepare.bat skip-release silent
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent
 
       - name: Free up some disk space.
         shell: bash
