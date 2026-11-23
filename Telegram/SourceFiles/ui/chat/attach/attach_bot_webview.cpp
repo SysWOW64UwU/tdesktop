@@ -1257,6 +1257,7 @@ Panel::Panel(Args &&args)
 	}
 	_widget->setWindowFlag(Qt::WindowStaysOnTopHint, false);
 	_widget->setInnerSize(st::botWebViewPanelSize, true);
+	_widget->setFullscreenAllowed(true);
 
 	const auto panel = _widget.get();
 	rpl::duplicate(
@@ -1292,6 +1293,11 @@ Panel::Panel(Args &&args)
 		if (!_externalShell) {
 			_fullscreen = fullscreen;
 		}
+	}, _widget->lifetime());
+
+	_widget->fullscreenRequests(
+	) | rpl::on_next([=] {
+		_fullscreen = !_fullscreen.current();
 	}, _widget->lifetime());
 
 	_widget->closeRequests(
