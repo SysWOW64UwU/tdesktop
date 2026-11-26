@@ -113,6 +113,7 @@ struct Labeled {
 		{ C::SendSilentMessage, tr::lng_shortcuts_silent_send() },
 		{ C::ScheduleMessage, tr::lng_shortcuts_schedule() },
 		{ C::SendUnformatted, tr::lng_shortcuts_send_unformatted() },
+		{ C::PasteUnformatted, tr::lng_shortcuts_paste_unformatted() },
 		separator,
 		{ C::ComposeAiApplyInPlace, tr::lng_shortcuts_ai_compose_apply() },
 		{ C::ShowRichEditor, tr::lng_shortcuts_rich_editor() },

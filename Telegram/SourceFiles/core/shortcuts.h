@@ -100,6 +100,8 @@ enum class Command {
 
 	FastForward,
 	FastCopy,
+
+	PasteUnformatted,
 };
 
 [[maybe_unused]] constexpr auto kShowFolder = {

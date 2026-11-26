@@ -771,6 +771,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 "lng_shortcuts_archive" = "Archived chats";
 "lng_shortcuts_contacts" = "Contacts list";
 "lng_shortcuts_just_send" = "Just send";
+"lng_shortcuts_paste_unformatted" = "Paste unformatted";
 "lng_shortcuts_silent_send" = "Silent send";
 "lng_shortcuts_schedule" = "Schedule";
 "lng_shortcuts_send_unformatted" = "Send unformatted";

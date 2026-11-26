@@ -597,6 +597,7 @@ void Manager::fillDefaults() {
 	set(u"alt+c"_q                   , Command::FastCopy);
 	set(u"alt+return"_q              , Command::SendUnformatted);
 	set(u"alt+enter"_q               , Command::SendUnformatted);
+	set(u"ctrl+shift+v"_q            , Command::PasteUnformatted);
 	
 	_defaults = keysCurrents();
 }

@@ -25,6 +25,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/core_settings.h"
 #include "core/update_checker.h"
 #include "core/shortcuts.h"
+#include "ui/widgets/fields/input_field.h"
 #include "core/sandbox.h"
 #include "core/local_url_handlers.h"
 #include "core/launcher.h"
@@ -2181,6 +2182,9 @@ void Application::startShortcuts() {
 		});
 		request->check(Command::ReopenClosedWindow) && request->handle([=] {
 			return _savedWindows && _savedWindows->reopenLastClosed();
+		});
+		request->check(Command::PasteUnformatted) && request->handle([] {
+			return Ui::InputField::PastePlainToFocused();
 		});
 		request->check(Command::CloseOtherWindows) && request->handle([=] {
 			return closeOtherWindows();
