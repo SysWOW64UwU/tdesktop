@@ -450,6 +450,7 @@ void SetupExperimental(
 				Dialogs::kOptionDialogsUnreadOnTop,
 				Dialogs::Ui::kOptionDialogsMuteIcon,
 				kOptionUseNewChatView,
+				kOptionChatListOnRight,
 				kOptionAutoScrollInactiveChat,
 				kModerateCommonGroups,
 				Info::kClassicProfileScroll,

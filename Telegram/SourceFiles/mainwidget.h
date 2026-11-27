@@ -100,6 +100,7 @@ class Changelogs;
 
 extern const char kForceComposeSearchOneColumn[];
 extern const char kOptionUseNewChatView[];
+extern const char kOptionChatListOnRight[];
 
 class MainWidget final
 	: public Ui::RpWidget

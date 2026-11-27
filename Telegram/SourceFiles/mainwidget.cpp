@@ -126,10 +126,17 @@ base::options::toggle OptionUseNewChatView({
 	.defaultValue = true,
 });
 
+base::options::toggle OptionChatListOnRight({
+	.id = kOptionChatListOnRight,
+	.name = "Chat list on the right",
+	.description = "Place the chat list on the right side of the window.",
+});
+
 } // namespace
 
 const char kForceComposeSearchOneColumn[] = "force-compose-search-one-column";
 const char kOptionUseNewChatView[] = "use-modern-chat-view";
+const char kOptionChatListOnRight[] = "chat-list-on-right";
 
 enum StackItemType {
 	HistoryStackItem,
@@ -344,6 +351,13 @@ MainWidget::MainWidget(
 	) | rpl::on_next([=] {
 		crl::on_main(this, [=] {
 			updateDialogsWidthAnimated();
+		});
+	}, lifetime());
+
+	base::options::lookup<bool>(kOptionChatListOnRight).changes(
+	) | rpl::on_next([=] {
+		crl::on_main(this, [=] {
+			updateControlsGeometry();
 		});
 	}, lifetime());
 
@@ -2769,11 +2783,12 @@ void MainWidget::updateControlsGeometry() {
 			_contentScrollAddToY);
 		if (_hider) _hider->setGeometry(0, 0, dialogsWidth, height());
 	} else {
+		const auto onRight = OptionChatListOnRight.value();
 		auto thirdSectionWidth = _thirdSection ? _thirdColumnWidth : 0;
 		if (_thirdSection) {
 			auto thirdSectionTop = getThirdSectionTop();
 			_thirdSection->setGeometry(
-				width() - thirdSectionWidth,
+				onRight ? 0 : width() - thirdSectionWidth,
 				thirdSectionTop,
 				thirdSectionWidth,
 				height() - thirdSectionTop);
@@ -2784,18 +2799,19 @@ void MainWidget::updateControlsGeometry() {
 			accumulate_min(
 				dialogsWidth,
 				width() - st::columnMinimalWidthMain);
-			_dialogs->setGeometryToLeft(0, 0, dialogsWidth, height());
+			const auto dialogsX = onRight ? width() - dialogsWidth : 0;
+			_dialogs->setGeometryToLeft(dialogsX, 0, dialogsWidth, height());
 		}
 		if (_sideShadow) {
 			_sideShadow->setGeometryToLeft(
-				dialogsWidth,
+				onRight ? width() - dialogsWidth - st::lineWidth : dialogsWidth,
 				shadowTop,
 				st::lineWidth,
 				shadowHeight);
 		}
 		if (_thirdShadow) {
 			_thirdShadow->setGeometryToLeft(
-				width() - thirdSectionWidth - st::lineWidth,
+				onRight ? thirdSectionWidth : width() - thirdSectionWidth - st::lineWidth,
 				shadowTop,
 				st::lineWidth,
 				shadowHeight);
@@ -2803,29 +2819,32 @@ void MainWidget::updateControlsGeometry() {
 		const auto mainSectionWidth = width()
 			- dialogsWidth
 			- thirdSectionWidth;
+		const auto mainSectionX = onRight
+			? thirdSectionWidth
+			: dialogsWidth;
 		if (_callTopBar) {
 			_callTopBar->resizeToWidth(mainSectionWidth);
-			_callTopBar->moveToLeft(dialogsWidth, 0);
+			_callTopBar->moveToLeft(mainSectionX, 0);
 		}
 		if (_exportTopBar) {
 			_exportTopBar->resizeToWidth(mainSectionWidth);
-			_exportTopBar->moveToLeft(dialogsWidth, _callTopBarHeight);
+			_exportTopBar->moveToLeft(mainSectionX, _callTopBarHeight);
 		}
 		if (_player) {
 			_player->resizeToWidth(mainSectionWidth);
 			_player->moveToLeft(
-				dialogsWidth,
+				mainSectionX,
 				_callTopBarHeight + _exportTopBarHeight);
 		}
 		_history->setGeometryWithTopMoved(QRect(
-			dialogsWidth,
+			mainSectionX,
 			mainSectionTop,
 			mainSectionWidth,
 			height() - mainSectionTop
 		), _contentScrollAddToY);
 		if (_hider) {
 			_hider->setGeometryToLeft(
-				dialogsWidth,
+				mainSectionX,
 				0,
 				mainSectionWidth,
 				height());
@@ -2863,8 +2882,12 @@ void MainWidget::destroyThirdSection() {
 void MainWidget::refreshResizeAreas() {
 	if (!isOneColumn() && _dialogs) {
 		ensureFirstColumnResizeAreaCreated();
+		const auto onRight = OptionChatListOnRight.value();
+		const auto areaX = onRight
+			? (_dialogs->x() - st::historyResizeWidth)
+			: (_dialogs->x() + _dialogs->width());
 		_firstColumnResizeArea->setGeometryToLeft(
-			_history->x(),
+			areaX,
 			0,
 			st::historyResizeWidth,
 			height());
@@ -2875,7 +2898,9 @@ void MainWidget::refreshResizeAreas() {
 	if (isThreeColumn() && _thirdSection) {
 		ensureThirdColumnResizeAreaCreated();
 		_thirdColumnResizeArea->setGeometryToLeft(
-			_thirdSection->x(),
+			OptionChatListOnRight.value()
+				? (_thirdSection->x() + _thirdSection->width())
+				: _thirdSection->x(),
 			0,
 			st::historyResizeWidth,
 			height());
@@ -2905,7 +2930,12 @@ void MainWidget::ensureFirstColumnResizeAreaCreated() {
 		return;
 	}
 	auto moveLeftCallback = [=](int globalLeft) {
-		const auto newWidth = globalLeft - mapToGlobal(QPoint(0, 0)).x();
+		const auto localLeft = globalLeft - mapToGlobal(QPoint(0, 0)).x();
+		const auto onRight = OptionChatListOnRight.value();
+		const auto edge = onRight ? width() : 0;
+		const auto newWidth = onRight
+			? (edge - localLeft)
+			: (localLeft - edge);
 		const auto newRatio = (newWidth < st::columnMinimalWidthLeft / 2)
 			? 0.
 			: float64(newWidth) / width();
@@ -2935,7 +2965,10 @@ void MainWidget::ensureThirdColumnResizeAreaCreated() {
 		return;
 	}
 	auto moveLeftCallback = [=](int globalLeft) {
-		auto newWidth = mapToGlobal(QPoint(width(), 0)).x() - globalLeft;
+		const auto localLeft = globalLeft - mapToGlobal(QPoint(0, 0)).x();
+		const auto newWidth = OptionChatListOnRight.value()
+			? localLeft
+			: (width() - localLeft);
 		_controller->columns().setThirdColumnWidth(newWidth);
 	};
 	auto moveFinishedCallback = [=] {

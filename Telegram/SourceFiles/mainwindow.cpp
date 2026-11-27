@@ -407,6 +407,8 @@ void MainWindow::showMainMenu() {
 	if (isHidden()) showFromTray();
 
 	ensureLayerCreated();
+	_layer->setMainMenuOnRight(
+		base::options::lookup<bool>(kOptionChatListOnRight).value());
 	_layer->showMainMenu(
 		object_ptr<Window::MainMenu>(body(), sessionController()),
 		anim::type::normal);
